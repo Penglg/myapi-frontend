@@ -17,6 +17,7 @@ import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
 
 /**
+ * 处理新建的方法，即新建的那个弹窗
  * @en-US Add node
  * @zh-CN 添加节点
  * @param fields
@@ -36,6 +37,7 @@ const handleAdd = async (fields: API.RuleListItem) => {
 };
 
 /**
+ * 处理修改
  * @en-US Update node
  * @zh-CN 更新节点
  *
@@ -61,6 +63,7 @@ const handleUpdate = async (fields: FormValueType) => {
 };
 
 /**
+ * 删除
  *  Delete node
  * @zh-CN 删除节点
  *
