@@ -13,7 +13,7 @@ export default [
     routes: [
       // { path: '/admin', redirect: '/admin/sub-page' },
       { name: '接口管理', icon: 'table', path: '/admin/interface', component: './InterfaceInfo' },
-      { path: '/admin/sub-page', name: '二级管理页', component: './Admin' },
+      // { path: '/admin/sub-page', name: '二级管理页', component: './Admin' },
     ],
   },
   // { path: '/', redirect: '/welcome' },

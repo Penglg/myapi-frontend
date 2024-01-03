@@ -1,68 +1,22 @@
-import { addRule, removeRule, updateRule } from '@/services/ant-design-pro/api';
+import { removeRule } from '@/services/ant-design-pro/api';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
-  ModalForm,
   PageContainer,
   ProDescriptions,
-  ProFormText,
-  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
 import { FormattedMessage, useIntl } from '@umijs/max';
 import { Button, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
-import type { FormValueType } from './components/UpdateForm';
-import UpdateForm from './components/UpdateForm';
+import UpdateModal from './components/UpdateModal';
 import type { SortOrder } from 'antd/es/table/interface';
-import { listInterfaceInfoByPageUsingGET } from '@/services/myapi-backend/intefaceInfoController';
+import { addInterfaceInfoUsingPOST, listInterfaceInfoByPageUsingGET, updateInterfaceInfoUsingPOST } from '@/services/myapi-backend/intefaceInfoController';
+import CreateModal from './components/CreateModal';
 
-/**
- * 处理新建的方法，即新建的那个弹窗
- * @en-US Add node
- * @zh-CN 添加节点
- * @param fields
- */
-const handleAdd = async (fields: API.RuleListItem) => {
-  const hide = message.loading('正在添加');
-  try {
-    await addRule({ ...fields });
-    hide();
-    message.success('Added successfully');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Adding failed, please try again!');
-    return false;
-  }
-};
 
-/**
- * 处理修改
- * @en-US Update node
- * @zh-CN 更新节点
- *
- * @param fields
- */
-const handleUpdate = async (fields: FormValueType) => {
-  const hide = message.loading('Configuring');
-  try {
-    await updateRule({
-      name: fields.name,
-      desc: fields.desc,
-      key: fields.key,
-    });
-    hide();
 
-    message.success('Configuration is successful');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Configuration failed, please try again!');
-    return false;
-  }
-};
 
 /**
  * 删除
@@ -107,6 +61,51 @@ const TableList: React.FC = () => {
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   /**
+   * 处理新建的方法，即新建的那个弹窗
+   * @en-US Add node
+   * @zh-CN 添加节点
+   * @param fields
+   */
+  const handleAdd = async (fields: API.InterfaceInfoAddRequest) => {
+    const hide = message.loading('正在添加');
+    try {
+      await addInterfaceInfoUsingPOST({ ...fields });
+      hide();
+      message.success('创建成功');
+      handleModalOpen(false);
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('创建失败' + error.message);
+      return false;
+    }
+  };
+
+  /**
+ * 处理修改
+ * @en-US Update node
+ * @zh-CN 更新节点
+ *
+ * @param fields
+ */
+  const handleUpdate = async (fields: API.InterfaceInfoUpdateRequest) => {
+    const hide = message.loading('修改中');
+    try {
+      await updateInterfaceInfoUsingPOST({
+        ...fields
+      });
+      hide();
+
+      message.success('操作成功');
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('操作失败，' + error.message);
+      return false;
+    }
+  };
+
+  /**
    * @en-US International configuration
    * @zh-CN 国际化配置
    * */
@@ -122,6 +121,11 @@ const TableList: React.FC = () => {
       title: '接口名称',
       dataIndex: 'name',
       valueType: 'text',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
     },
     {
       title: '描述',
@@ -132,21 +136,41 @@ const TableList: React.FC = () => {
       title: '请求方法',
       dataIndex: 'method',
       valueType: 'text',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
     },
     {
       title: '接口地址',
       dataIndex: 'url',
       valueType: 'text',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
     },
     {
       title: '请求头',
       dataIndex: 'requestHeader',
       valueType: 'textarea',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
     },
     {
       title: '响应头',
       dataIndex: 'responseHeader',
       valueType: 'textarea',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
     },
     {
       title: '状态',
@@ -167,11 +191,13 @@ const TableList: React.FC = () => {
       title: '创建时间',
       dataIndex: 'createTime',
       valueType: 'dateTime',
+      hideInForm: true,
     },
     {
       title: '更新时间',
       dataIndex: 'updateTime',
       valueType: 'dateTime',
+      hideInForm: true,
     },
     {
       title: '操作',
@@ -185,13 +211,7 @@ const TableList: React.FC = () => {
             setCurrentRow(record);
           }}
         >
-          <FormattedMessage id="pages.searchTable.config" defaultMessage="Configuration" />
-        </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          <FormattedMessage
-            id="pages.searchTable.subscribeAlert"
-            defaultMessage="Subscribe to alerts"
-          />
+          <FormattedMessage id="pages.searchTable.config" defaultMessage="修改" />
         </a>,
       ],
     },
@@ -217,12 +237,12 @@ const TableList: React.FC = () => {
               handleModalOpen(true);
             }}
           >
-            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="New" />
+            <PlusOutlined /> <FormattedMessage id="pages.searchTable.new" defaultMessage="新建" />
           </Button>,
         ]}
         // 加载页面、刷新或查询时会触发该请求
         request={async (params, sort: Record<string, SortOrder>, filter: Record<string, (string | number)[] | null>) => {
-          const res = await listInterfaceInfoByPageUsingGET({
+          const res: any = await listInterfaceInfoByPageUsingGET({
             ...params
           })
           if (res?.data) {
@@ -230,6 +250,12 @@ const TableList: React.FC = () => {
               data: res?.data.records || [],
               success: true,
               total: res.data.total,
+            }
+          } else {
+            return {
+              data: [],
+              success: false,
+              total: 0,
             }
           }
         }}
@@ -279,42 +305,9 @@ const TableList: React.FC = () => {
           </Button>
         </FooterToolbar>
       )}
-      <ModalForm
-        title={intl.formatMessage({
-          id: 'pages.searchTable.createForm.newRule',
-          defaultMessage: 'New rule',
-        })}
-        width="400px"
-        open={createModalOpen}
-        onOpenChange={handleModalOpen}
-        onFinish={async (value) => {
-          const success = await handleAdd(value as API.RuleListItem);
-          if (success) {
-            handleModalOpen(false);
-            if (actionRef.current) {
-              actionRef.current.reload();
-            }
-          }
-        }}
-      >
-        <ProFormText
-          rules={[
-            {
-              required: true,
-              message: (
-                <FormattedMessage
-                  id="pages.searchTable.ruleName"
-                  defaultMessage="Rule name is required"
-                />
-              ),
-            },
-          ]}
-          width="md"
-          name="name"
-        />
-        <ProFormTextArea width="md" name="desc" />
-      </ModalForm>
-      <UpdateForm
+
+      <UpdateModal
+        columns={ columns }
         onSubmit={async (value) => {
           const success = await handleUpdate(value);
           if (success) {
@@ -331,7 +324,7 @@ const TableList: React.FC = () => {
             setCurrentRow(undefined);
           }
         }}
-        updateModalOpen={updateModalOpen}
+        visible={updateModalOpen}
         values={currentRow || {}}
       />
 
@@ -358,6 +351,11 @@ const TableList: React.FC = () => {
           />
         )}
       </Drawer>
+      <CreateModal
+        columns={columns}
+        onCancel={() => { handleModalOpen(false) }}
+        onSubmit={(values) => { handleAdd(values) }}
+        visible={createModalOpen} />
     </PageContainer>
   );
 };
