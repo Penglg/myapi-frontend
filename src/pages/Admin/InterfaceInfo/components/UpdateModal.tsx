@@ -19,6 +19,7 @@ const UpdateModal: React.FC<Props> = (props) => {
 
   const formRef = useRef<ProFormInstance>();
 
+  // 监听某个变量的变化，若变化则会触发里面的函数
   useEffect(() => {
     if (formRef) {
       formRef.current?.setFieldsValue(values);
@@ -26,7 +27,7 @@ const UpdateModal: React.FC<Props> = (props) => {
   }, [values])
 
   return (
-    <Modal visible={visible} onCancel={() => onCancel?.()}>
+    <Modal visible={visible} footer={null} onCancel={() => onCancel?.()}>
       <ProTable
         type="form"
         columns={columns}

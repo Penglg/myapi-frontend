@@ -1,4 +1,3 @@
-import { removeRule } from '@/services/ant-design-pro/api';
 import { PlusOutlined } from '@ant-design/icons';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
@@ -12,35 +11,8 @@ import { Button, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import UpdateModal from './components/UpdateModal';
 import type { SortOrder } from 'antd/es/table/interface';
-import { addInterfaceInfoUsingPOST, listInterfaceInfoByPageUsingGET, updateInterfaceInfoUsingPOST } from '@/services/myapi-backend/intefaceInfoController';
+import { addInterfaceInfoUsingPOST, deleteInterfaceInfoUsingPOST, listInterfaceInfoByPageUsingGET, offlineInterfaceInfoUsingPOST, onlineInterfaceInfoUsingPOST, updateInterfaceInfoUsingPOST } from '@/services/myapi-backend/intefaceInfoController';
 import CreateModal from './components/CreateModal';
-
-
-
-
-/**
- * 删除
- *  Delete node
- * @zh-CN 删除节点
- *
- * @param selectedRows
- */
-const handleRemove = async (selectedRows: API.RuleListItem[]) => {
-  const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
-  try {
-    await removeRule({
-      key: selectedRows.map((row) => row.key),
-    });
-    hide();
-    message.success('Deleted successfully and will refresh soon');
-    return true;
-  } catch (error) {
-    hide();
-    message.error('Delete failed, please try again');
-    return false;
-  }
-};
 
 const TableList: React.FC = () => {
   /**
@@ -104,6 +76,82 @@ const TableList: React.FC = () => {
       return false;
     }
   };
+
+  /**
+ * 发布
+ * @zh-CN 发布接口
+ *
+ * @param selectedRows
+ */
+const handleOnline = async (record: API.IdRequest) => {
+  const hide = message.loading('正在发布');
+  if (!record) return true;
+  try {
+    await onlineInterfaceInfoUsingPOST({
+      id: record.id,
+    });
+    hide();
+    message.success('操作成功');
+    // 刷新
+    actionRef.current?.reload();
+    return true;
+  } catch (error: any) {
+    hide();
+    message.error('操作失败，' + error.message);
+    return false;
+  }
+};
+
+  /**
+ * 下线
+ * @zh-CN 下线接口
+ *
+ * @param selectedRows
+ */
+  const handleOffline = async (record: API.IdRequest) => {
+    const hide = message.loading('正在下线');
+    if (!record) return true;
+    try {
+      await offlineInterfaceInfoUsingPOST({
+        id: record.id,
+      });
+      hide();
+      message.success('操作成功');
+      // 刷新
+      actionRef.current?.reload();
+      return true;
+    } catch (error: any) {
+      hide();
+      message.error('操作失败，' + error.message);
+      return false;
+    }
+  };
+
+  /**
+ * 删除
+ *  Delete node
+ * @zh-CN 删除节点
+ *
+ * @param selectedRows
+ */
+const handleRemove = async (record: API.InterfaceInfo) => {
+  const hide = message.loading('正在删除');
+  if (!record) return true;
+  try {
+    await deleteInterfaceInfoUsingPOST({
+      id: record.id,
+    });
+    hide();
+    message.success('操作成功');
+    // 刷新
+    actionRef.current?.reload();
+    return true;
+  } catch (error: any) {
+    hide();
+    message.error('操作失败，' + error.message);
+    return false;
+  }
+};
 
   /**
    * @en-US International configuration
@@ -213,6 +261,35 @@ const TableList: React.FC = () => {
         >
           <FormattedMessage id="pages.searchTable.config" defaultMessage="修改" />
         </a>,
+        record.status === 0 ? <a
+        key="config"
+        onClick={() => {
+          handleUpdateModalOpen(true);
+          setCurrentRow(record);
+        }}
+        >
+        <FormattedMessage id="pages.searchTable.config" defaultMessage="发布" />
+        </a> : null,
+        record.status === 1 ? <Button
+          type='text'
+          danger
+          key="config"
+          onClick={() => {
+            handleOnline(record);
+          }}
+        >
+          <FormattedMessage id="pages.searchTable.config" defaultMessage="下线" />
+        </Button> : null,
+        <Button
+          type='text'
+          danger
+          key="config"
+          onClick={() => {
+            handleOffline(record);
+          }}
+        >
+          <FormattedMessage id="pages.searchTable.config" defaultMessage="删除" />
+        </Button>,
       ],
     },
   ];
