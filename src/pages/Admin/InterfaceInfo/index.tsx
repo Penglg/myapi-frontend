@@ -29,7 +29,7 @@ const TableList: React.FC = () => {
   const [showDetail, setShowDetail] = useState<boolean>(false);
 
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<API.RuleListItem>();
+  const [currentRow, setCurrentRow] = useState<API.InterfaceInfo>();
   const [selectedRowsState, setSelectedRows] = useState<API.RuleListItem[]>([]);
 
   /**
@@ -64,6 +64,7 @@ const TableList: React.FC = () => {
     const hide = message.loading('修改中');
     try {
       await updateInterfaceInfoUsingPOST({
+        id: currentRow?.id,
         ...fields
       });
       hide();
@@ -163,6 +164,7 @@ const handleRemove = async (record: API.InterfaceInfo) => {
     {
       title: 'id',
       dataIndex: 'id',
+      // 类型是index就不会出现在表单上
       valueType: 'index',
     },
     {
@@ -201,9 +203,19 @@ const handleRemove = async (record: API.InterfaceInfo) => {
       },
     },
     {
+      title: '请求参数',
+      dataIndex: 'requestParams',
+      valueType: 'jsonCode',
+      formItemProps: {
+        rules: [{
+          required: true,
+        }]
+      },
+    },
+    {
       title: '请求头',
       dataIndex: 'requestHeader',
-      valueType: 'textarea',
+      valueType: 'jsonCode',
       formItemProps: {
         rules: [{
           required: true,
@@ -213,7 +225,7 @@ const handleRemove = async (record: API.InterfaceInfo) => {
     {
       title: '响应头',
       dataIndex: 'responseHeader',
-      valueType: 'textarea',
+      valueType: 'jsonCode',
       formItemProps: {
         rules: [{
           required: true,
@@ -261,31 +273,32 @@ const handleRemove = async (record: API.InterfaceInfo) => {
         >
           <FormattedMessage id="pages.searchTable.config" defaultMessage="修改" />
         </a>,
+        
         record.status === 0 ? <a
         key="config"
         onClick={() => {
-          handleUpdateModalOpen(true);
-          setCurrentRow(record);
+          handleOnline(record);
         }}
         >
         <FormattedMessage id="pages.searchTable.config" defaultMessage="发布" />
-        </a> : null,
-        record.status === 1 ? <Button
-          type='text'
-          danger
-          key="config"
-          onClick={() => {
-            handleOnline(record);
-          }}
-        >
-          <FormattedMessage id="pages.searchTable.config" defaultMessage="下线" />
-        </Button> : null,
-        <Button
+        </a> :
+         <Button
           type='text'
           danger
           key="config"
           onClick={() => {
             handleOffline(record);
+          }}
+        >
+          <FormattedMessage id="pages.searchTable.config" defaultMessage="下线" />
+        </Button>,
+
+        <Button
+          type='text'
+          danger
+          key="config"
+          onClick={() => {
+            handleRemove(record);
           }}
         >
           <FormattedMessage id="pages.searchTable.config" defaultMessage="删除" />
