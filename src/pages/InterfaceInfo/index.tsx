@@ -1,4 +1,4 @@
-import { getInterfaceInfoByIdUsingGET, invokeInterfaceInfoUsingPOST } from '@/services/myapi-backend/intefaceInfoController';
+import { getInterfaceInfoByIdUsingGET, invokeInterfaceInfoUsingPOST } from '@/services/myapi-backend/interfaceInfoController';
 import { PageContainer } from '@ant-design/pro-components';
 import { useParams } from '@umijs/max';
 import { Button, Card, Descriptions, Form, message, Input, Divider } from 'antd';

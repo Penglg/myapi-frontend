@@ -11,7 +11,7 @@ import { Button, Drawer, message } from 'antd';
 import React, { useRef, useState } from 'react';
 import UpdateModal from './components/UpdateModal';
 import type { SortOrder } from 'antd/es/table/interface';
-import { addInterfaceInfoUsingPOST, deleteInterfaceInfoUsingPOST, listInterfaceInfoByPageUsingGET, offlineInterfaceInfoUsingPOST, onlineInterfaceInfoUsingPOST, updateInterfaceInfoUsingPOST } from '@/services/myapi-backend/intefaceInfoController';
+import { addInterfaceInfoUsingPOST, deleteInterfaceInfoUsingPOST, listInterfaceInfoByPageUsingGET, offlineInterfaceInfoUsingPOST, onlineInterfaceInfoUsingPOST, updateInterfaceInfoUsingPOST } from '@/services/myapi-backend/interfaceInfoController';
 import CreateModal from './components/CreateModal';
 
 const TableList: React.FC = () => {

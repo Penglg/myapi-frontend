@@ -1,4 +1,4 @@
-import { listInterfaceInfoByPageUsingGET } from '@/services/myapi-backend/intefaceInfoController';
+import { listInterfaceInfoByPageUsingGET } from '@/services/myapi-backend/interfaceInfoController';
 import { PageContainer } from '@ant-design/pro-components';
 import { List, message } from 'antd';
 import React, { useEffect, useState } from 'react';
